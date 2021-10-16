@@ -20,9 +20,45 @@ import javafx.collections.ObservableList;
 
 public class Database {
     
-    final private String database= "jdbc:sqlite:PetDatabase.db";
+    
+    final private String database = "jdbc:sqlite:PetDatabase.db";
+    
+    public void initialize() throws SQLException {
+        setupDatabase();
+    }
     
     public void setupDatabase() throws SQLException {
+        System.out.println("HELLO");
+        Connection conn = DriverManager.getConnection(database);
+        Statement st = conn.createStatement();
+        
+        String createStatementUsers = "CREATE TABLE IF NOT EXISTS Users "
+                + "(ID INTEGER PRIMARY KEY autoincrement, "
+                + "USERNAME TEXT NOT NULL, "
+                + "PASSWORD TEXT NOT NULL "
+                + ");";
+        String createStatementPets = "CREATE TABLE IF NOT EXISTS PETS "
+                + "(ID INTEGER PRIMARY KEY autoincrement, "
+                + "NAME TEXT NOT NULL, "
+                + "SPECIES TEXT NOT NULL, "
+                + "COLOUR TEXT NOT NULL, "
+                + "OWNER TEXT NOT NULL "
+                + ");";
+        
+        st.execute(createStatementUsers);
+        st.execute(createStatementPets);
+        
+        String insertQuery = "INSERT OR IGNORE INTO Users (ID, USERNAME, PASSWORD) "
+                + "VALUES (2, 'pdiakos', 'diakos#1');";
+        String insertQuery2 = "INSERT OR IGNORE INTO PETS (ID, NAME, SPECIES, COLOUR, OWNER) "
+                + "VALUES (99, 'TESTER', 'TESTER', 'TESTER', 'TESTER');";        
+        System.out.println("FLAG1");
+        st.execute(insertQuery);
+        st.execute(insertQuery2);
+        System.out.println("FLAG2");
+        st.close();
+        conn.close();
+        
         // Connect to Database 
        
         // Create Users table, with id, username, and password fields
@@ -44,7 +80,7 @@ public class Database {
 
         //write the SQL query and the java code to insert all four pets
         PreparedStatement pSt = conn.prepareStatement(
-            "INSERT OR IGNORE INTO PETS (id, name, species, colour, owner) VALUES (?,?,?,?,?)"
+            "INSERT OR IGNORE INTO PETS (ID, NAME, SPECIES, COLOUR, OWNER) VALUES (?,?,?,?,?)"
         );
 
         // Data to insert
@@ -70,30 +106,37 @@ public class Database {
     public boolean login(String username, String password) throws SQLException {
         Connection conn = DriverManager.getConnection(database);
         PreparedStatement pst = conn.prepareStatement(
-            "SELECT * FROM Users WHERE USERNAME = ? AND PASSWORD = ?"
+            "SELECT COUNT(1) FROM Users WHERE USERNAME = ? AND PASSWORD = ?"
         );
         pst.setString(1, username);
         pst.setString(2, password);
         ResultSet rs = pst.executeQuery();
-        
+        rs.next();
+        System.out.println(rs.getInt(1));
+        boolean result = rs.getInt(1) == 1;
+        return result; 
         // Check if user exists - if so return true, else return false
-        
-        return true;
     }
     
     public ObservableList<Pet> getPets() throws SQLException {
         // Get ResultSet of all pets that exist in the database
+        System.out.println("GETTING PETS");
         Connection conn = DriverManager.getConnection(database);
         Statement st = conn.createStatement();
-        String query = "SELECT id, name, species, colour, owner FROM PETS";
+        String query = "SELECT ID, NAME, SPECIES, COLOUR, OWNER FROM PETS";
         ResultSet rs = st.executeQuery(query);
         
         ObservableList<Pet> petsList = FXCollections.observableArrayList();
         // Add each row in the ResultSet to the petsList
-        
+        while (rs.next()) {
+            petsList.add(new Pet((int) rs.getObject(1), rs.getObject(2).toString(), rs.getObject(3).toString(), rs.getObject(4).toString(), rs.getObject(5).toString()));
+        }
+        System.out.println(petsList);
         // Close 
         st.close();
         conn.close();
         return petsList;
     }
+    
+
 }

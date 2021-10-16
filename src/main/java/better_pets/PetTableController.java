@@ -32,11 +32,14 @@ public class PetTableController {
     @FXML
     public void initialize() throws SQLException {
         // Get a list of all of pets in the database
-        ObservableList<Pet> petsList;
-        
+        Database databaseConnection = new Database();
         // Set this list into the TableView
-        
+        petTbl.setItems(databaseConnection.getPets());
+        System.out.println("PETTABLECONTROLLER INITIALISED");
         // Set all the columns in to tableview columns
-        
+        nameCol.setCellValueFactory(new PropertyValueFactory <Pet, String>("name"));
+        speciesCol.setCellValueFactory(new PropertyValueFactory <Pet, String>("species"));
+        colourCol.setCellValueFactory(new PropertyValueFactory <Pet, String>("colour"));
+        ownerCol.setCellValueFactory(new PropertyValueFactory <Pet, String>("owner"));
     }
 }
