@@ -27,7 +27,7 @@ public class LoginController {
     public Label outputLabel;
     
     public void intialize() throws SQLException {
-        System.out.println("INITIALISING LOGIN CONTROLLER");
+        System.out.println("INITIALISING LOGIN CONTROLLER!");
         Database databaseConnection = new Database();
         databaseConnection.setupDatabase();
         databaseConnection.initialize();
